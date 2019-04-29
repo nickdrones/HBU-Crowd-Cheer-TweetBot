@@ -20,30 +20,30 @@ twitter=Twython(consumer_key,consumer_secret,access_token,access_token_secret)
 
 spi_ch = 0
 lastHighest=0
-huskyCheers=["Dawgs Up!","Go Huskies!"]
+huskyCheers=["Dawgs Up!","Go Huskies!"] #initialize a list of cheers to append at the end of tweet
 otherTeam="otherBois"
 # Enable SPI
 spi = spidev.SpiDev(0, spi_ch)
-spi.max_speed_hz = 1200000
+spi.max_speed_hz = 1200000 #set the SPI refresh rate
 
 def tweetit():
     window.destroy()
     print "Tweeting..."
     print "\n"
-    cheer=huskyCheers[random.randint(0,1)]
-    currentDT = datetime.datetime.now()
+    cheer=huskyCheers[random.randint(0,1)] #choose a random cheer
+    currentDT = datetime.datetime.now() #get current date/time
     message = "*THIS IS AN AUTOMATED TWEET* \nA new crowd noise level was set tonight at HBU Huskies Football stadium during the game against {} at {} on {}! {}".format(otherTeam,currentDT.strftime("%I:%M %p"),currentDT.strftime("%a, %b %d, %Y"),cheer)
     print "taking photo..."
-    os.system('fswebcam -r 1280x720 --no-banner image.jpg')
+    os.system('fswebcam -r 1280x720 --no-banner image.jpg') #run terminal command to save photo from webcam
     time.sleep(4)
     print "photo taken, attaching to tweet"
     image = open('image.jpg','rb')
-    response = twitter.upload_media(media=image)
+    response = twitter.upload_media(media=image) #upload image to twitter server
     media_id = [response['media_id']]
     print "image uploaded to twitter server, tweeting message"
-    twitter.update_status(status=message,media_ids=media_id)
+    twitter.update_status(status=message,media_ids=media_id) #attach image to tweet
     print "tweet successfully sent, deleting image"
-    os.system('sudo rm image.jpg')
+    os.system('sudo rm image.jpg') #delete image once completed
     print "image deleted, checking files"
     checkFiles = os.popen('ls').read()
     print(checkFiles)
@@ -54,7 +54,7 @@ class GUI(Frame):
         self.master = master
 
     def setupGUI(self):
-        l1 = Label(self.master, text = "Send Tweet?")
+        l1 = Label(self.master, text = "Send Tweet?") #popup gui to prompt user to finalize tweet
         l1.grid(row = 0, column = 0, columnspan = 2, sticky = E+W)
         
         b1 = Button(self.master, text = "YES", bg = 'green', fg = 'black', width = 50, height = 5, command = tweetit)
@@ -83,7 +83,9 @@ t.setupGUI()
 
 
 def read_adc(adc_ch, vref = 3.3):
-
+    ########################################
+    # read_adc method provided by Sparkfun
+    ########################################
     # Make sure ADC channel is 0 or 1
     if adc_ch != 0:
         adc_ch = 1
@@ -116,7 +118,7 @@ def read_adc(adc_ch, vref = 3.3):
 # Report the channel 0 and channel 1 voltages to the terminal
 otherTeam=str(raw_input("Please enter opposing team:"))
 
-file = open("lasthighest.txt","r")
+file = open("lasthighest.txt","r") #log next highest sound level from sensor to txt file
 lastHighest=float(file.read())
 file.close()
 print "Last Highest: {}".format(lastHighest)
@@ -124,10 +126,10 @@ while True:
     adc_0 = read_adc(0)
     print("Ch 0:", round(adc_0, 2), "V")
     time.sleep(0.2)
-    if(round(adc_0,2)>lastHighest):
+    if(round(adc_0,2)>lastHighest): #if the latest value from the sensor is higher then the latest entry from the txt file,
         personInput = str(raw_input("New High Value detected: Save value {} and save tweet?".format(round(adc_0,2))))
         personInput=personInput.lower()
-        if(personInput=="yes"):
+        if(personInput=="yes"): #if person types "yes" to save value, GUI pops up to ask if they want to tweet this data
             print "New High Value: {}".format(round(adc_0,2))
             file = open("lasthighest.txt","w")
             file.write(str(round(adc_0,2)))
